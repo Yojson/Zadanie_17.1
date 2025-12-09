@@ -9,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 public class AddTrainingActivity extends AppCompatActivity {
 
     private EditText editName, editReps, editDuration;
@@ -39,6 +42,9 @@ public class AddTrainingActivity extends AppCompatActivity {
         String name = editName.getText().toString().trim();
         String repsString = editReps.getText().toString().trim();
         String durationString = editDuration.getText().toString().trim();
+        String date = new Date().toString();
+
+
 
         if (name.isEmpty() || repsString.isEmpty() || durationString.isEmpty()) {
             Toast.makeText(this, "Uzupełnij wszystkie pola", Toast.LENGTH_SHORT).show();
@@ -53,6 +59,7 @@ public class AddTrainingActivity extends AppCompatActivity {
         values.put(TrainingDbHelper.COLUMN_NAME, name);
         values.put(TrainingDbHelper.COLUMN_REPS, reps);
         values.put(TrainingDbHelper.COLUMN_DURATION, duration);
+        values.put(TrainingDbHelper.COLUMN_DATE, date);
 
         long newRowId = db.insert(TrainingDbHelper.TABLE_NAME, null, values);
 
