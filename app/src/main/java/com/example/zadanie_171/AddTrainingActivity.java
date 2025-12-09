@@ -5,17 +5,19 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 public class AddTrainingActivity extends AppCompatActivity {
 
-    private EditText editName, editReps, editDuration;
-    private Button buttonSave;
+    private EditText editReps, editDuration;
+    private Spinner spinnerDifficulty;
+    private Button buttonSave, buttonCancel;
     private TrainingDbHelper dbHelper;
 
     @Override
@@ -25,28 +27,36 @@ public class AddTrainingActivity extends AppCompatActivity {
 
         dbHelper = new TrainingDbHelper(this);
 
-        editName = findViewById(R.id.editExerciseName);
+        spinnerDifficulty = findViewById(R.id.spinnerDifficulty);
         editReps = findViewById(R.id.editRepsCount);
         editDuration = findViewById(R.id.editDuration);
         buttonSave = findViewById(R.id.buttonSave);
+        buttonCancel = findViewById(R.id.buttonCancel);
 
-        buttonSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveTraining();
-            }
-        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Łatwy", "Średni", "Trudny"}
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDifficulty.setAdapter(adapter);
+
+
+        buttonCancel.setOnClickListener(v -> finish());
+
+
+        buttonSave.setOnClickListener(v -> saveTraining());
     }
 
     private void saveTraining() {
-        String name = editName.getText().toString().trim();
         String repsString = editReps.getText().toString().trim();
         String durationString = editDuration.getText().toString().trim();
+        String difficulty = spinnerDifficulty.getSelectedItem().toString();
         String date = new Date().toString();
 
 
-
-        if (name.isEmpty() || repsString.isEmpty() || durationString.isEmpty()) {
+        if (repsString.isEmpty() || durationString.isEmpty()) {
             Toast.makeText(this, "Uzupełnij wszystkie pola", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -54,12 +64,18 @@ public class AddTrainingActivity extends AppCompatActivity {
         int reps = Integer.parseInt(repsString);
         int duration = Integer.parseInt(durationString);
 
+
+        if (reps <= 0) {
+            Toast.makeText(this, "Liczba powtórzeń musi być większa od zera", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(TrainingDbHelper.COLUMN_NAME, name);
         values.put(TrainingDbHelper.COLUMN_REPS, reps);
         values.put(TrainingDbHelper.COLUMN_DURATION, duration);
         values.put(TrainingDbHelper.COLUMN_DATE, date);
+        values.put(TrainingDbHelper.COLUMN_DIFFICULTY, difficulty);
 
         long newRowId = db.insert(TrainingDbHelper.TABLE_NAME, null, values);
 
@@ -71,5 +87,3 @@ public class AddTrainingActivity extends AppCompatActivity {
         }
     }
 }
-
-
